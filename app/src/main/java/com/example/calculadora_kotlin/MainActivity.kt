@@ -14,6 +14,8 @@ class MainActivity : AppCompatActivity() {
     var operationPartTwo = ""
     var operator = ""
     var result = 0.0
+    var isResultDisplayed = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityMainBinding.inflate(layoutInflater)
 
@@ -24,55 +26,72 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
 
-        }
         binding.buttomclear.setOnClickListener {
-                operationPartOne = ""
-                operationPartTwo = ""
-                binding.textoperation.setText("")
-                operator = ""
-                binding.textresult.setText("")
+            operationPartOne = ""
+            operationPartTwo = ""
+            binding.textoperation.setText("")
+            operator = ""
+            binding.textresult.setText("")
+            isResultDisplayed = false
         }
-        fun operationSum(){
+
+        fun operationSum() {
             result = operationPartOne.toDouble() + operationPartTwo.toDouble()
             binding.textresult.setText(result.toString())
         }
-        fun operationSub(){
+
+        fun operationSub() {
             result = operationPartOne.toDouble() - operationPartTwo.toDouble()
             binding.textresult.setText(result.toString())
         }
-        fun operationMulti(){
-            result  = operationPartOne.toDouble() * operationPartTwo.toDouble()
+
+        fun operationMulti() {
+            result = operationPartOne.toDouble() * operationPartTwo.toDouble()
             binding.textresult.setText(result.toString())
         }
-        fun operationDiv(){
-            if (operationPartTwo.toDouble() == 0.0){
+
+        fun operationDiv() {
+
+            if (operationPartOne.toDouble() == 0.0 && operationPartTwo.toDouble() == 0.0) {
+                binding.textresult.setText("Indeterminação (0/0)")
+                return
+            }
+            if (operationPartTwo.toDouble() == 0.0) {
                 binding.textresult.setText("impossível dividir por 0.")
                 return
             }
             result = operationPartOne.toDouble() / operationPartTwo.toDouble()
             binding.textresult.setText(result.toString())
         }
-        fun setNumber(num: String){
+
+        fun setNumber(num: String) {
+            if (isResultDisplayed) {
+                binding.textoperation.setText("")
+                operationPartOne = ""
+                operationPartTwo = ""
+                operator = ""
+                isResultDisplayed = false
+            }
             binding.textoperation.append(num)
         }
 
-        fun setComma(){
+        fun setComma() {
             val current = binding.textoperation.text.toString()
             if (!current.contains(".")) {
                 binding.textoperation.append(".")
             }
         }
 
-        fun backspace(){
+        fun backspace() {
             val current = binding.textoperation.text.toString()
-
             if (current.isNotEmpty()) {
                 binding.textoperation.setText(current.dropLast(1))
             }
         }
 
-        fun setNumbers(){
+        fun setNumbers() {
             binding.buttom0.setOnClickListener { setNumber("0") }
             binding.buttom1.setOnClickListener { setNumber("1") }
             binding.buttom2.setOnClickListener { setNumber("2") }
@@ -84,30 +103,52 @@ class MainActivity : AppCompatActivity() {
             binding.buttom8.setOnClickListener { setNumber("8") }
             binding.buttom9.setOnClickListener { setNumber("9") }
         }
-        fun setOperator(op: String){
-            operator = op
-            operationPartOne = binding.textoperation.text.toString()
-            binding.textoperation.setText("")
+
+        fun setOperator(op: String) {
+            if (isResultDisplayed) {
+                operationPartOne = binding.textresult.text.toString()
+                operator = op
+                binding.textoperation.setText("")
+                binding.textresult.setText("")
+                isResultDisplayed = false
+            } else {
+                operator = op
+                operationPartOne = binding.textoperation.text.toString()
+                binding.textoperation.setText("")
+            }
         }
+
         fun setOperatorListeners() {
             binding.buttomsum.setOnClickListener { setOperator("+") }
             binding.buttomminus.setOnClickListener { setOperator("-") }
             binding.buttommulti.setOnClickListener { setOperator("x") }
             binding.buttomdivt.setOnClickListener { setOperator("/") }
         }
-        fun result(){
+
+        fun result() {
             operationPartTwo = binding.textoperation.text.toString()
-            when(operator){
+            if (operationPartOne.isEmpty() || operationPartTwo.isEmpty() || operator.isEmpty()) {
+                return
+            }
+
+            when(operator) {
                 "+" -> operationSum()
                 "-" -> operationSub()
                 "x" -> operationMulti()
                 "/" -> operationDiv()
             }
+
+            isResultDisplayed = true
+
+            binding.textoperation.setText("$operationPartOne $operator $operationPartTwo")
         }
+
         setOperatorListeners()
-        fun resultListener(){
+
+        fun resultListener() {
             binding.buttomresult.setOnClickListener { result() }
         }
+
         setNumbers()
         resultListener()
 
